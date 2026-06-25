@@ -12,20 +12,20 @@
         .workshop-hero {
             margin-top: 64px;
             background: linear-gradient(135deg, #ea4335, #fbbc04);
-            padding: 60px 24px;
+            padding: 48px 24px;
             text-align: center;
             color: #fff;
         }
 
         .workshop-hero h1 {
             font-family: var(--font-display);
-            font-size: 2.5rem;
+            font-size: 2.25rem;
             font-weight: 700;
-            margin-bottom: 12px;
+            margin-bottom: 8px;
         }
 
         .workshop-hero p {
-            font-size: 1.125rem;
+            font-size: 1rem;
             opacity: 0.9;
             max-width: 700px;
             margin: 0 auto;
@@ -49,42 +49,106 @@
         }
 
         .workshop-schedule {
-            max-width: 1000px;
+            max-width: 1100px;
             margin: 0 auto;
             padding: 60px 24px;
         }
 
-        .workshop-week {
-            margin-bottom: 48px;
+        /* Region Tabs */
+        .region-tabs {
+            display: flex;
+            gap: 0;
+            margin-bottom: 40px;
+            border-bottom: 2px solid var(--color-border);
         }
 
-        .workshop-week h2 {
+        .region-tab {
+            font-family: var(--font-display);
+            font-size: 1rem;
+            font-weight: 500;
+            padding: 14px 28px;
+            background: none;
+            border: none;
+            color: var(--color-gray);
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            margin-bottom: -2px;
+            transition: color 0.2s, border-color 0.2s;
+        }
+
+        .region-tab:hover {
+            color: var(--color-blue);
+        }
+
+        .region-tab.active {
+            color: var(--color-blue);
+            border-bottom-color: var(--color-blue);
+        }
+
+        /* Region Content */
+        .region-content {
+            display: none;
+        }
+
+        .region-content.active {
+            display: block;
+        }
+
+        .region-title {
             font-family: var(--font-display);
             font-size: 1.5rem;
             font-weight: 700;
             color: var(--color-dark);
-            margin-bottom: 20px;
-            padding-bottom: 8px;
-            border-bottom: 2px solid var(--color-border);
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
 
+        .region-title .region-badge {
+            font-size: 0.75rem;
+            font-weight: 500;
+            padding: 4px 12px;
+            border-radius: 12px;
+            color: #fff;
+        }
+
+        .badge-north {
+            background: var(--color-blue);
+        }
+
+        .badge-south {
+            background: var(--color-green);
+        }
+
+        .badge-west {
+            background: #e65100;
+        }
+
+        /* Workshop Day Card */
         .workshop-day {
-            display: flex;
-            gap: 20px;
-            padding: 20px;
             border: 1px solid var(--color-border);
-            border-radius: 8px;
-            margin-bottom: 12px;
-            transition: box-shadow 0.2s, border-color 0.2s;
+            border-radius: 10px;
+            margin-bottom: 16px;
+            overflow: hidden;
+            transition: box-shadow 0.2s;
         }
 
         .workshop-day:hover {
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-            border-color: var(--color-blue);
+            box-shadow: 0 3px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        .workshop-day-header {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 18px 24px;
+            background: var(--color-light-gray);
+            border-bottom: 1px solid var(--color-border);
         }
 
         .workshop-day-date {
-            min-width: 70px;
+            min-width: 60px;
             text-align: center;
         }
 
@@ -95,44 +159,75 @@
             color: var(--color-blue);
         }
 
-        .workshop-day-date .day-name {
-            font-size: 0.75rem;
+        .workshop-day-date .day-label {
+            font-size: 0.7rem;
             color: var(--color-gray);
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
 
-        .workshop-day-content h3 {
+        .workshop-day-header h3 {
             font-family: var(--font-display);
             font-size: 1.0625rem;
             font-weight: 500;
-            margin-bottom: 4px;
+            color: var(--color-dark);
         }
 
-        .workshop-day-content p {
-            font-size: 0.875rem;
-            color: var(--color-gray);
-            line-height: 1.5;
+        .workshop-day-locations {
+            padding: 16px 24px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
         }
 
-        .workshop-day-content .topic-tag {
+        .location-chip {
             display: inline-block;
-            font-size: 0.6875rem;
-            font-weight: 500;
-            padding: 3px 8px;
-            border-radius: 10px;
-            margin-top: 8px;
-            margin-right: 6px;
+            font-size: 0.8125rem;
+            font-weight: 400;
+            padding: 6px 14px;
+            background: rgba(66, 133, 244, 0.06);
+            border: 1px solid rgba(66, 133, 244, 0.15);
+            border-radius: 20px;
+            color: var(--color-dark);
+            transition: background 0.2s;
         }
 
-        .tag-safety { background: #fce4ec; color: #c62828; }
-        .tag-quality { background: #e8f5e9; color: #2e7d32; }
-        .tag-productivity { background: #e3f2fd; color: #1565c0; }
-        .tag-cost { background: #fff3e0; color: #e65100; }
-        .tag-delivery { background: #f3e5f5; color: #6a1b9a; }
-        .tag-digital { background: #e0f7fa; color: #00695c; }
-        .tag-morale { background: #fce4ec; color: #ad1457; }
-        .tag-environment { background: #e8f5e9; color: #1b5e20; }
+        .location-chip:hover {
+            background: rgba(66, 133, 244, 0.12);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .workshop-hero h1 {
+                font-size: 1.75rem;
+            }
+
+            .region-tabs {
+                flex-direction: column;
+                border-bottom: none;
+                gap: 4px;
+            }
+
+            .region-tab {
+                border-bottom: none;
+                border-left: 3px solid transparent;
+                text-align: left;
+                padding: 12px 20px;
+            }
+
+            .region-tab.active {
+                border-left-color: var(--color-blue);
+                border-bottom-color: transparent;
+                background: var(--color-light-gray);
+                border-radius: 0 6px 6px 0;
+            }
+
+            .workshop-day-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 8px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -140,11 +235,13 @@
     <header class="navbar">
         <div class="navbar-container">
             <div class="navbar-brand">
+                <img src="Logo.png" alt="AI Awareness Month Logo" class="navbar-logo">
                 <span class="brand-ai">AI</span>&nbsp;<span class="brand-text">Awareness Month</span>
             </div>
             <nav class="navbar-links" aria-label="Main navigation">
                 <a href="index.html#events" class="nav-link active">EVENTS</a>
                 <a href="index.html#learn" class="nav-link">LEARN</a>
+                <a href="index.html#build" class="nav-link">BUILD</a>
                 <a href="index.html#watch" class="nav-link">WATCH</a>
             </nav>
             <button class="mobile-menu-btn" aria-label="Toggle menu" aria-expanded="false">
@@ -163,139 +260,207 @@
     <div class="workshop-schedule">
         <a href="index.html#events" class="back-link">← Back to Events</a>
 
-        <!-- Week 1 -->
-        <div class="workshop-week">
-            <h2>Week 1: 7th – 11th July</h2>
+        <!-- Region Tabs -->
+        <div class="region-tabs">
+            <button class="region-tab active" data-region="north">Region - North (Delhi-NCR)</button>
+            <button class="region-tab" data-region="south">Region - South</button>
+            <button class="region-tab" data-region="west">Region - West</button>
+        </div>
 
+        <!-- Region North -->
+        <div class="region-content active" id="region-north">
+            <h2 class="region-title">
+                Region - North (Delhi-NCR)
+                <span class="region-badge badge-north">North</span>
+            </h2>
+
+            <!-- 7th July -->
             <div class="workshop-day">
-                <div class="workshop-day-date">
-                    <div class="day-num">7</div>
-                    <div class="day-name">Mon</div>
+                <div class="workshop-day-header">
+                    <div class="workshop-day-date">
+                        <div class="day-num">7</div>
+                        <div class="day-label">July</div>
+                    </div>
+                    <h3>UML - Manesar Switch + Corporate</h3>
                 </div>
-                <div class="workshop-day-content">
-                    <h3>AI for Safety</h3>
-                    <p>How AI-driven analytics can predict hazards, improve workplace safety, and reduce incident rates.</p>
-                    <span class="topic-tag tag-safety">Safety</span>
+                <div class="workshop-day-locations">
+                    <span class="location-chip">UML - Manesar Switch</span>
+                    <span class="location-chip">Corporate</span>
                 </div>
             </div>
 
+            <!-- 8th July -->
             <div class="workshop-day">
-                <div class="workshop-day-date">
-                    <div class="day-num">8</div>
-                    <div class="day-name">Tue</div>
+                <div class="workshop-day-header">
+                    <div class="workshop-day-date">
+                        <div class="day-num">8</div>
+                        <div class="day-label">July</div>
+                    </div>
+                    <h3>UML - Lighting Manesar + Multi-location</h3>
                 </div>
-                <div class="workshop-day-content">
-                    <h3>AI for Quality</h3>
-                    <p>Leveraging machine learning for defect detection, quality assurance automation, and continuous improvement.</p>
-                    <span class="topic-tag tag-quality">Quality</span>
+                <div class="workshop-day-locations">
+                    <span class="location-chip">UML - Lighting Manesar</span>
+                    <span class="location-chip">MTP</span>
+                    <span class="location-chip">UML Fuel Cap Mnsr</span>
+                    <span class="location-chip">MWTL</span>
+                    <span class="location-chip">Rinder Sonipat</span>
+                    <span class="location-chip">Khed</span>
+                    <span class="location-chip">MITIL Polymers</span>
                 </div>
             </div>
 
+            <!-- 9th July -->
             <div class="workshop-day">
-                <div class="workshop-day-date">
-                    <div class="day-num">9</div>
-                    <div class="day-name">Wed</div>
+                <div class="workshop-day-header">
+                    <div class="workshop-day-date">
+                        <div class="day-num">9</div>
+                        <div class="day-label">July</div>
+                    </div>
+                    <h3>MRPL - Manesar + EV Farukhnagar + Pantnagar</h3>
                 </div>
-                <div class="workshop-day-content">
-                    <h3>AI for Productivity</h3>
-                    <p>Boosting operational efficiency with AI-powered scheduling, resource optimization, and process automation.</p>
-                    <span class="topic-tag tag-productivity">Productivity</span>
+                <div class="workshop-day-locations">
+                    <span class="location-chip">MRPL - Manesar</span>
+                    <span class="location-chip">MRPL Farukhnagar</span>
+                    <span class="location-chip">EV Farukhnagar</span>
+                    <span class="location-chip">Pantnagar</span>
                 </div>
             </div>
 
+            <!-- 10th July -->
             <div class="workshop-day">
-                <div class="workshop-day-date">
-                    <div class="day-num">10</div>
-                    <div class="day-name">Thu</div>
+                <div class="workshop-day-header">
+                    <div class="workshop-day-date">
+                        <div class="day-num">10</div>
+                        <div class="day-label">July</div>
+                    </div>
+                    <h3>Bawal + Bhiwadi Cluster</h3>
                 </div>
-                <div class="workshop-day-content">
-                    <h3>AI for Cost Optimization</h3>
-                    <p>Using predictive models and AI insights to reduce operational costs and improve financial planning.</p>
-                    <span class="topic-tag tag-cost">Cost</span>
-                </div>
-            </div>
-
-            <div class="workshop-day">
-                <div class="workshop-day-date">
-                    <div class="day-num">11</div>
-                    <div class="day-name">Fri</div>
-                </div>
-                <div class="workshop-day-content">
-                    <h3>AI for Delivery</h3>
-                    <p>Streamlining supply chain and delivery operations with AI-driven demand forecasting and logistics planning.</p>
-                    <span class="topic-tag tag-delivery">Delivery</span>
+                <div class="workshop-day-locations">
+                    <span class="location-chip">Denso Ten Bawal</span>
+                    <span class="location-chip">Minda Onkyo Pvt. Ltd</span>
+                    <span class="location-chip">MKL - Bawal</span>
+                    <span class="location-chip">UMAW4W - Bawal / KMM</span>
+                    <span class="location-chip">UML - Acoustic Div (DTA)</span>
+                    <span class="location-chip">UML - Casting Bawal</span>
+                    <span class="location-chip">UML Seating - Bhiwadi</span>
+                    <span class="location-chip">UML - Sunroof</span>
                 </div>
             </div>
         </div>
 
-        <!-- Week 2 -->
-        <div class="workshop-week">
-            <h2>Week 2: 14th – 20th July</h2>
+        <!-- Region South -->
+        <div class="region-content" id="region-south">
+            <h2 class="region-title">
+                Region - South
+                <span class="region-badge badge-south">South</span>
+            </h2>
 
+            <!-- 13th July -->
             <div class="workshop-day">
-                <div class="workshop-day-date">
-                    <div class="day-num">14</div>
-                    <div class="day-name">Mon</div>
+                <div class="workshop-day-header">
+                    <div class="workshop-day-date">
+                        <div class="day-num">13</div>
+                        <div class="day-label">July</div>
+                    </div>
+                    <h3>Hosur + Bangalore Cluster</h3>
                 </div>
-                <div class="workshop-day-content">
-                    <h3>AI for Digital Transformation</h3>
-                    <p>Driving digital-first strategies with AI, from intelligent automation to data-driven decision making.</p>
-                    <span class="topic-tag tag-digital">Digital</span>
+                <div class="workshop-day-locations">
+                    <span class="location-chip">Seating Hosur</span>
+                    <span class="location-chip">MKL Bangalore</span>
+                    <span class="location-chip">Switch Hosur</span>
+                    <span class="location-chip">MKL - Bangalore</span>
+                    <span class="location-chip">UML - Casting Hosur</span>
+                    <span class="location-chip">UML - Switch Hosur</span>
+                    <span class="location-chip">UML Seating Hosur</span>
+                    <span class="location-chip">UML - Rinder Hosur</span>
                 </div>
             </div>
 
+            <!-- 14th July -->
             <div class="workshop-day">
-                <div class="workshop-day-date">
-                    <div class="day-num">15</div>
-                    <div class="day-name">Tue</div>
+                <div class="workshop-day-header">
+                    <div class="workshop-day-date">
+                        <div class="day-num">14</div>
+                        <div class="day-label">July</div>
+                    </div>
+                    <h3>Chennai + Mysuru Cluster</h3>
                 </div>
-                <div class="workshop-day-content">
-                    <h3>AI for Morale & People</h3>
-                    <p>Enhancing employee engagement, well-being, and team dynamics with AI-powered people analytics.</p>
-                    <span class="topic-tag tag-morale">Morale</span>
+                <div class="workshop-day-locations">
+                    <span class="location-chip">MRPL - Chennai</span>
+                    <span class="location-chip">UML - Lighting Chennai</span>
+                    <span class="location-chip">UML Seating Chennai</span>
+                    <span class="location-chip">UML Seating - Mysuru</span>
                 </div>
             </div>
 
+            <!-- 16th July -->
             <div class="workshop-day">
-                <div class="workshop-day-date">
-                    <div class="day-num">16</div>
-                    <div class="day-name">Wed</div>
+                <div class="workshop-day-header">
+                    <div class="workshop-day-date">
+                        <div class="day-num">16</div>
+                        <div class="day-label">July</div>
+                    </div>
+                    <h3>CREAT - Multi Location</h3>
                 </div>
-                <div class="workshop-day-content">
-                    <h3>AI for Environment & Sustainability</h3>
-                    <p>How AI supports carbon reduction, energy efficiency, waste minimization, and sustainable manufacturing.</p>
-                    <span class="topic-tag tag-environment">Environment</span>
+                <div class="workshop-day-locations">
+                    <span class="location-chip">CREAT Pune</span>
+                    <span class="location-chip">CREAT - Gurgaon</span>
+                    <span class="location-chip">CREAT Chennai</span>
+                    <span class="location-chip">GCESTAT</span>
+                    <span class="location-chip">GKWT</span>
+                    <span class="location-chip">UML - Chennai CREAT</span>
                 </div>
             </div>
 
+            <!-- 17th July -->
             <div class="workshop-day">
-                <div class="workshop-day-date">
-                    <div class="day-num">17</div>
-                    <div class="day-name">Thu</div>
+                <div class="workshop-day-header">
+                    <div class="workshop-day-date">
+                        <div class="day-num">17</div>
+                        <div class="day-label">July</div>
+                    </div>
+                    <h3>Pune Cluster</h3>
                 </div>
-                <div class="workshop-day-content">
-                    <h3>Cross-functional AI Integration</h3>
-                    <p>Bringing it all together — building an integrated AI strategy across all SQPCDDME pillars.</p>
-                    <span class="topic-tag tag-safety">S</span>
-                    <span class="topic-tag tag-quality">Q</span>
-                    <span class="topic-tag tag-productivity">P</span>
-                    <span class="topic-tag tag-cost">C</span>
-                    <span class="topic-tag tag-delivery">D</span>
-                    <span class="topic-tag tag-digital">D</span>
-                    <span class="topic-tag tag-morale">M</span>
-                    <span class="topic-tag tag-environment">E</span>
+                <div class="workshop-day-locations">
+                    <span class="location-chip">Switch Pune</span>
+                    <span class="location-chip">MKPL - Minda Katolec</span>
+                    <span class="location-chip">MRPL - Chakan Pune</span>
+                    <span class="location-chip">UML - Alloy Wheel Ahmednagar</span>
+                    <span class="location-chip">UML - Controller Division</span>
+                    <span class="location-chip">UML - Lighting Pune</span>
+                    <span class="location-chip">UML - Sensor Division Pune</span>
+                    <span class="location-chip">UML - Switch Pune</span>
+                    <span class="location-chip">UML Seating Pune</span>
+                    <span class="location-chip">UML - Rinder Pune</span>
                 </div>
             </div>
+        </div>
 
+        <!-- Region West -->
+        <div class="region-content" id="region-west">
+            <h2 class="region-title">
+                Region - West
+                <span class="region-badge badge-west">West</span>
+            </h2>
+
+            <!-- 20th July -->
             <div class="workshop-day">
-                <div class="workshop-day-date">
-                    <div class="day-num">18</div>
-                    <div class="day-name">Fri</div>
+                <div class="workshop-day-header">
+                    <div class="workshop-day-date">
+                        <div class="day-num">20</div>
+                        <div class="day-label">July</div>
+                    </div>
+                    <h3>Gujarat Cluster</h3>
                 </div>
-                <div class="workshop-day-content">
-                    <h3>Hands-on AI Lab & Wrap-up</h3>
-                    <p>Practical lab session to apply learnings, followed by a panel discussion and certificate ceremony.</p>
-                    <span class="topic-tag tag-digital">Hands-on</span>
+                <div class="workshop-day-locations">
+                    <span class="location-chip">AW4W Gujarat</span>
+                    <span class="location-chip">MKAW - Gujarat</span>
+                    <span class="location-chip">MKL - Gujarat</span>
+                    <span class="location-chip">MRPL - Gujarat</span>
+                    <span class="location-chip">Roki Minda - Gujarat</span>
+                    <span class="location-chip">TG Minda Gujarat</span>
+                    <span class="location-chip">UML - Lighting Gujarat</span>
+                    <span class="location-chip">UML - Wheel Assembly</span>
                 </div>
             </div>
         </div>
@@ -311,6 +476,32 @@
         </div>
     </footer>
 
-    <script src="script.js"></script>
+    <script>
+        // Region tab switching
+        const tabs = document.querySelectorAll('.region-tab');
+        const contents = document.querySelectorAll('.region-content');
+
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                tabs.forEach(t => t.classList.remove('active'));
+                contents.forEach(c => c.classList.remove('active'));
+
+                tab.classList.add('active');
+                const region = tab.getAttribute('data-region');
+                document.getElementById('region-' + region).classList.add('active');
+            });
+        });
+
+        // Mobile menu
+        const mobileMenuBtn = document.querySelector('.mobile-menu-btn');
+        const navbarLinks = document.querySelector('.navbar-links');
+        if (mobileMenuBtn) {
+            mobileMenuBtn.addEventListener('click', () => {
+                const isExpanded = mobileMenuBtn.getAttribute('aria-expanded') === 'true';
+                mobileMenuBtn.setAttribute('aria-expanded', !isExpanded);
+                navbarLinks.classList.toggle('active');
+            });
+        }
+    </script>
 </body>
 </html>
