@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prompt Engineering Guide - AI Awareness Month</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        .pdf-hero {
+            margin-top: 64px;
+            background: linear-gradient(135deg, #4285f4, #7b1fa2);
+            padding: 48px 24px;
+            text-align: center;
+            color: #fff;
+        }
+
+        .pdf-hero h1 {
+            font-family: var(--font-display);
+            font-size: 2.25rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .pdf-hero p {
+            font-size: 1rem;
+            opacity: 0.9;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .pdf-viewer-wrapper {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 40px 24px 80px;
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-family: var(--font-display);
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--color-blue);
+            margin-bottom: 24px;
+            transition: color 0.2s;
+        }
+
+        .back-link:hover {
+            color: #3367d6;
+            text-decoration: underline;
+        }
+
+        /* PDF Embed */
+        .pdf-embed-container {
+            border: 1px solid var(--color-border);
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        .pdf-embed-container iframe {
+            width: 100%;
+            height: 85vh;
+            border: none;
+            display: block;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .pdf-hero h1 {
+                font-size: 1.75rem;
+            }
+
+            .pdf-embed-container iframe {
+                height: 70vh;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <header class="navbar">
+        <div class="navbar-container">
+            <div class="navbar-brand">
+                <span class="brand-ai">AI</span>&nbsp;<span class="brand-text">Awareness Month</span>
+            </div>
+            <nav class="navbar-links" aria-label="Main navigation">
+                <a href="index.html#events" class="nav-link">EVENTS</a>
+                <a href="index.html#learn" class="nav-link active">LEARN</a>
+                <a href="index.html#build" class="nav-link">BUILD</a>
+                <a href="index.html#watch" class="nav-link">WATCH</a>
+            </nav>
+            <button class="mobile-menu-btn" aria-label="Toggle menu" aria-expanded="false">
+                <span class="hamburger"></span>
+            </button>
+        </div>
+    </header>
+
+    <!-- Hero -->
+    <div class="pdf-hero">
+        <h1>Prompt Engineering Guide</h1>
+        <p>Learn the fundamentals of crafting effective prompts for AI models</p>
+    </div>
+
+    <!-- PDF Viewer -->
+    <div class="pdf-viewer-wrapper">
+        <a href="index.html#learn" class="back-link">← Back to Learn</a>
+
+        <!-- Embedded PDF -->
+        <div class="pdf-embed-container">
+            <iframe src="Prompt_Engineering.pdf" id="pdf-frame" title="Prompt Engineering Guide"></iframe>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-container">
+            <div class="footer-brand">
+                <span class="brand-ai">AI</span><span class="brand-text"> Awareness Month</span>
+            </div>
+            <p class="footer-copy">&copy; 2026 AI Awareness Month. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+        // Mobile menu
+        const mobileMenuBtn = document.querySelector('.mobile-menu-btn');
+        const navbarLinks = document.querySelector('.navbar-links');
+        if (mobileMenuBtn) {
+            mobileMenuBtn.addEventListener('click', () => {
+                const isExpanded = mobileMenuBtn.getAttribute('aria-expanded') === 'true';
+                mobileMenuBtn.setAttribute('aria-expanded', !isExpanded);
+                navbarLinks.classList.toggle('active');
+            });
+        }
+    </script>
+</body>
+</html>

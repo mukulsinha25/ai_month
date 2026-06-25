@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Workshop Planner - AI Awareness Month</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        .workshop-hero {
+            margin-top: 64px;
+            background: linear-gradient(135deg, #ea4335, #fbbc04);
+            padding: 60px 24px;
+            text-align: center;
+            color: #fff;
+        }
+
+        .workshop-hero h1 {
+            font-family: var(--font-display);
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 12px;
+        }
+
+        .workshop-hero p {
+            font-size: 1.125rem;
+            opacity: 0.9;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-family: var(--font-display);
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--color-blue);
+            margin-bottom: 32px;
+            transition: color 0.2s;
+        }
+
+        .back-link:hover {
+            color: #3367d6;
+            text-decoration: underline;
+        }
+
+        .workshop-schedule {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 60px 24px;
+        }
+
+        .workshop-week {
+            margin-bottom: 48px;
+        }
+
+        .workshop-week h2 {
+            font-family: var(--font-display);
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--color-dark);
+            margin-bottom: 20px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid var(--color-border);
+        }
+
+        .workshop-day {
+            display: flex;
+            gap: 20px;
+            padding: 20px;
+            border: 1px solid var(--color-border);
+            border-radius: 8px;
+            margin-bottom: 12px;
+            transition: box-shadow 0.2s, border-color 0.2s;
+        }
+
+        .workshop-day:hover {
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            border-color: var(--color-blue);
+        }
+
+        .workshop-day-date {
+            min-width: 70px;
+            text-align: center;
+        }
+
+        .workshop-day-date .day-num {
+            font-family: var(--font-display);
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--color-blue);
+        }
+
+        .workshop-day-date .day-name {
+            font-size: 0.75rem;
+            color: var(--color-gray);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .workshop-day-content h3 {
+            font-family: var(--font-display);
+            font-size: 1.0625rem;
+            font-weight: 500;
+            margin-bottom: 4px;
+        }
+
+        .workshop-day-content p {
+            font-size: 0.875rem;
+            color: var(--color-gray);
+            line-height: 1.5;
+        }
+
+        .workshop-day-content .topic-tag {
+            display: inline-block;
+            font-size: 0.6875rem;
+            font-weight: 500;
+            padding: 3px 8px;
+            border-radius: 10px;
+            margin-top: 8px;
+            margin-right: 6px;
+        }
+
+        .tag-safety { background: #fce4ec; color: #c62828; }
+        .tag-quality { background: #e8f5e9; color: #2e7d32; }
+        .tag-productivity { background: #e3f2fd; color: #1565c0; }
+        .tag-cost { background: #fff3e0; color: #e65100; }
+        .tag-delivery { background: #f3e5f5; color: #6a1b9a; }
+        .tag-digital { background: #e0f7fa; color: #00695c; }
+        .tag-morale { background: #fce4ec; color: #ad1457; }
+        .tag-environment { background: #e8f5e9; color: #1b5e20; }
+    </style>
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <header class="navbar">
+        <div class="navbar-container">
+            <div class="navbar-brand">
+                <span class="brand-ai">AI</span>&nbsp;<span class="brand-text">Awareness Month</span>
+            </div>
+            <nav class="navbar-links" aria-label="Main navigation">
+                <a href="index.html#events" class="nav-link active">EVENTS</a>
+                <a href="index.html#learn" class="nav-link">LEARN</a>
+                <a href="index.html#watch" class="nav-link">WATCH</a>
+            </nav>
+            <button class="mobile-menu-btn" aria-label="Toggle menu" aria-expanded="false">
+                <span class="hamburger"></span>
+            </button>
+        </div>
+    </header>
+
+    <!-- Workshop Hero -->
+    <div class="workshop-hero">
+        <h1>AI Workshop Planner</h1>
+        <p>7th – 20th July 2026 | Sessions from Industry Experts on AI across SQPCDDME</p>
+    </div>
+
+    <!-- Workshop Schedule -->
+    <div class="workshop-schedule">
+        <a href="index.html#events" class="back-link">← Back to Events</a>
+
+        <!-- Week 1 -->
+        <div class="workshop-week">
+            <h2>Week 1: 7th – 11th July</h2>
+
+            <div class="workshop-day">
+                <div class="workshop-day-date">
+                    <div class="day-num">7</div>
+                    <div class="day-name">Mon</div>
+                </div>
+                <div class="workshop-day-content">
+                    <h3>AI for Safety</h3>
+                    <p>How AI-driven analytics can predict hazards, improve workplace safety, and reduce incident rates.</p>
+                    <span class="topic-tag tag-safety">Safety</span>
+                </div>
+            </div>
+
+            <div class="workshop-day">
+                <div class="workshop-day-date">
+                    <div class="day-num">8</div>
+                    <div class="day-name">Tue</div>
+                </div>
+                <div class="workshop-day-content">
+                    <h3>AI for Quality</h3>
+                    <p>Leveraging machine learning for defect detection, quality assurance automation, and continuous improvement.</p>
+                    <span class="topic-tag tag-quality">Quality</span>
+                </div>
+            </div>
+
+            <div class="workshop-day">
+                <div class="workshop-day-date">
+                    <div class="day-num">9</div>
+                    <div class="day-name">Wed</div>
+                </div>
+                <div class="workshop-day-content">
+                    <h3>AI for Productivity</h3>
+                    <p>Boosting operational efficiency with AI-powered scheduling, resource optimization, and process automation.</p>
+                    <span class="topic-tag tag-productivity">Productivity</span>
+                </div>
+            </div>
+
+            <div class="workshop-day">
+                <div class="workshop-day-date">
+                    <div class="day-num">10</div>
+                    <div class="day-name">Thu</div>
+                </div>
+                <div class="workshop-day-content">
+                    <h3>AI for Cost Optimization</h3>
+                    <p>Using predictive models and AI insights to reduce operational costs and improve financial planning.</p>
+                    <span class="topic-tag tag-cost">Cost</span>
+                </div>
+            </div>
+
+            <div class="workshop-day">
+                <div class="workshop-day-date">
+                    <div class="day-num">11</div>
+                    <div class="day-name">Fri</div>
+                </div>
+                <div class="workshop-day-content">
+                    <h3>AI for Delivery</h3>
+                    <p>Streamlining supply chain and delivery operations with AI-driven demand forecasting and logistics planning.</p>
+                    <span class="topic-tag tag-delivery">Delivery</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Week 2 -->
+        <div class="workshop-week">
+            <h2>Week 2: 14th – 20th July</h2>
+
+            <div class="workshop-day">
+                <div class="workshop-day-date">
+                    <div class="day-num">14</div>
+                    <div class="day-name">Mon</div>
+                </div>
+                <div class="workshop-day-content">
+                    <h3>AI for Digital Transformation</h3>
+                    <p>Driving digital-first strategies with AI, from intelligent automation to data-driven decision making.</p>
+                    <span class="topic-tag tag-digital">Digital</span>
+                </div>
+            </div>
+
+            <div class="workshop-day">
+                <div class="workshop-day-date">
+                    <div class="day-num">15</div>
+                    <div class="day-name">Tue</div>
+                </div>
+                <div class="workshop-day-content">
+                    <h3>AI for Morale & People</h3>
+                    <p>Enhancing employee engagement, well-being, and team dynamics with AI-powered people analytics.</p>
+                    <span class="topic-tag tag-morale">Morale</span>
+                </div>
+            </div>
+
+            <div class="workshop-day">
+                <div class="workshop-day-date">
+                    <div class="day-num">16</div>
+                    <div class="day-name">Wed</div>
+                </div>
+                <div class="workshop-day-content">
+                    <h3>AI for Environment & Sustainability</h3>
+                    <p>How AI supports carbon reduction, energy efficiency, waste minimization, and sustainable manufacturing.</p>
+                    <span class="topic-tag tag-environment">Environment</span>
+                </div>
+            </div>
+
+            <div class="workshop-day">
+                <div class="workshop-day-date">
+                    <div class="day-num">17</div>
+                    <div class="day-name">Thu</div>
+                </div>
+                <div class="workshop-day-content">
+                    <h3>Cross-functional AI Integration</h3>
+                    <p>Bringing it all together — building an integrated AI strategy across all SQPCDDME pillars.</p>
+                    <span class="topic-tag tag-safety">S</span>
+                    <span class="topic-tag tag-quality">Q</span>
+                    <span class="topic-tag tag-productivity">P</span>
+                    <span class="topic-tag tag-cost">C</span>
+                    <span class="topic-tag tag-delivery">D</span>
+                    <span class="topic-tag tag-digital">D</span>
+                    <span class="topic-tag tag-morale">M</span>
+                    <span class="topic-tag tag-environment">E</span>
+                </div>
+            </div>
+
+            <div class="workshop-day">
+                <div class="workshop-day-date">
+                    <div class="day-num">18</div>
+                    <div class="day-name">Fri</div>
+                </div>
+                <div class="workshop-day-content">
+                    <h3>Hands-on AI Lab & Wrap-up</h3>
+                    <p>Practical lab session to apply learnings, followed by a panel discussion and certificate ceremony.</p>
+                    <span class="topic-tag tag-digital">Hands-on</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-container">
+            <div class="footer-brand">
+                <span class="brand-ai">AI</span><span class="brand-text"> Awareness Month</span>
+            </div>
+            <p class="footer-copy">&copy; 2026 AI Awareness Month. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
