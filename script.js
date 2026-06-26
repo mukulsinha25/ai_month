@@ -10,6 +10,17 @@ if (mobileMenuBtn) {
     });
 }
 
+// Landing Video to Image transition with fade
+const landingVideo = document.getElementById('landing-video');
+const landingImage = document.getElementById('landing-image');
+
+if (landingVideo && landingImage) {
+    landingVideo.addEventListener('ended', () => {
+        landingVideo.classList.add('fade-out');
+        landingImage.classList.add('fade-in');
+    });
+}
+
 // Active nav link on scroll
 const sections = document.querySelectorAll('section[id]');
 const navLinks = document.querySelectorAll('.nav-link');

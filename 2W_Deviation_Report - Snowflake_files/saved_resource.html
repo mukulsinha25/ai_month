@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<!-- saved from url=(0263)https://st4z76sg6mjnpe5d4k67di.awsapsouth1.snowflake.app/a0952471792471/unominda/?embed=true&embed_options=show_padding&embed_options=light_theme&__parentOrigin=https%3A%2F%2Fapp.snowflake.com&__clientVersion=260622-1-f2d77d1f6cd&__hostFeature=SNOWSIGHT_STREAMLIT -->
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    
+    <meta name="viewport" content="width=device-width,initial-scale=1,shrink-to-fit=no">
+    <title>Streamlit</title>
+    <script>
+      window.prerenderReady = !1;
+      window.__WEBPACK_PUBLIC_PATH_OVERRIDE='https://app.snowflake.com/static/streamlit/1.52.2/';
+
+      window.__snowsight = window.__snowsight || {};
+      window.__snowsight.STREAMLIT_PREAMBLE_PARENT_ORIGIN='https://app.snowflake.com';
+      window.__snowsight.STREAMLIT_APP_SRC='https://app.snowflake.com/static/streamlit/1.52.2/static/js/index.js';
+      window.__snowsight.STREAMLIT_VERSION='1.52.2';
+      window.__snowsight.STREAMLIT_USE_SPCS_V2_RUNTIME=false;
+
+      window.__streamlit = window.__streamlit || {};
+      // The name of this window variable differs from the placeholder because
+      // it's the name expected by Streamlit OSS, and we don't want to have a
+      // window.__snowsight.* variable that duplicates the value.
+      window.__streamlit.MAIN_PAGE_BASE_URL='https://st4z76sg6mjnpe5d4k67di.awsapsouth1.snowflake.app/a0952471792471/unominda/';
+      // MAIN_PAGE_BASE_URL and HOST_CONFIG_BASE_URL may eventually differ but
+      // will be the same until we move the _stcore/host-config outside of GS.
+      window.__streamlit.HOST_CONFIG_BASE_URL='https://st4z76sg6mjnpe5d4k67di.awsapsouth1.snowflake.app/a0952471792471/unominda/';
+    </script>
+    <!-- Ensure the service worker is initialized prior to asset loading. -->
+    <script>
+  const ST_COMM_VERSION = 1;
+  // The minimum remaining token lifetime left we require. If the token will be
+  // expired after this amount of time passes, we will wait for a new token before
+  // issuing a request.
+  const TOKEN_EXPIRY_BUFFER_MS = 5000;
+  // API tokens we have received from Snowsight, by token type.
+  const tokenDataByType = {
+    gs: {
+      token: '',
+      expiresAt: 0,
+      sendMessageType: 'SET_GS_TOKEN',
+      requestMessageType: 'GS_TOKEN_INVALID'
+    },
+    spcs: {
+      token: '',
+      expiresAt: 0,
+      sendMessageType: 'SET_SPCS_TOKEN',
+      requestMessageType: 'SPCS_TOKEN_INVALID'
+    },
+    // Legacy type while updated service worker is rolling out.
+    legacyApi: {
+      token: '',
+      expiresAt: 0,
+      sendMessageType: 'SET_API_TOKEN',
+      requestMessageType: 'API_TOKEN_INVALID'
+    },
+  };
+  // True iff we're running in the v2 SPCS runtime.
+  const enableStreamlitSpcsRuntimeV2 = window.__snowsight.STREAMLIT_USE_SPCS_V2_RUNTIME;
+  // True iff this app's backend (i.e. SPCS endpoint) is ready.
+  // When using the SPCS v2 runtime, this is indicated by the backend base URL being unset. On
+  // warehouse, the app is always "ready" (the websocket will always accept connections).
+  const appReady = !window.__snowsight.STREAMLIT_USE_SPCS_V2_RUNTIME ||
+      !!window.__streamlit.BACKEND_BASE_URL;
+
+  let swReadyResolver;
+  if (enableStreamlitSpcsRuntimeV2) {
+    window.__snowsight.STREAMLIT_SW_READY_PROMISE = new Promise((resolve) => {
+      swReadyResolver = resolve;
+    })
+  }
+
+  // This is used by injected script tags to make failures more visible and explicit.
+  window.reportScriptLoadError = (scriptSrc) => {
+    sendMessageToParent("SCRIPT_LOAD_ERROR", {
+      scriptSrc,
+    });
+  };
+
+  function registerServiceWorker() {
+    const isServiceWorkerSupported = "serviceWorker" in navigator;
+    if (!isServiceWorkerSupported) {
+      const errorMessage = "Service worker is not supported.";
+
+      // eslint-disable-next-line no-console
+      console.error(errorMessage);
+
+      // Allow for better reporting of service worker support in the parent frame as this is now a
+      // blocker for the app to run.
+      sendMessageToParent("SERVICE_WORKER_INIT_FAILED", {
+        errorMessage,
+      });
+
+      return;
+    }
+
+    // If the app is not ready, the parent frame needs to be notified so that it can poll for status
+    // until the backend is available and it can reload the frame.
+    if (!appReady) {
+      sendMessageToParent("APP_NOT_READY");
+    }
+
+    const registrationStart = performance.now();
+    window.addEventListener("message", handleMessageEvent);
+    const baseIframeUrl = window.__streamlit.MAIN_PAGE_BASE_URL;
+    const serviceWorkerPath = "_stcore/static/sw.js";
+    navigator.serviceWorker.register(baseIframeUrl + serviceWorkerPath, {scope: baseIframeUrl})
+        .then(async () => {
+          // Note that at this point, we may not have a service worker active - and the active
+          // worker may be being replaced shortly by a new version. However, the
+          // `navigator.serviceWorker` below is a ServiceWorkerContainer (an abstraction across all
+          // installations), so we can register events here regardless.
+          //
+          // Note that our sendMessageToServiceWorker function will always send to the active
+          // worker, and will block on sending until there is an active worker.
+          const registrationEnd = performance.now();
+
+          navigator.serviceWorker.addEventListener("message", (event) => {
+            switch (event.data?.type) {
+              case "API_TOKEN_INVALID":
+                // Only handle if received from a legacy service worker.
+                if (event.data.serviceWorkerCommVersion === undefined) {
+                  ensureTokenValid(event.data.apiTokenExpiresAt, tokenDataByType.legacyApi);
+                }
+                break;
+              case "GS_TOKEN_INVALID":
+                ensureTokenValid(event.data.apiTokenExpiresAt, tokenDataByType.gs);
+                break;
+              case "SPCS_TOKEN_INVALID":
+                ensureTokenValid(event.data.apiTokenExpiresAt, tokenDataByType.spcs);
+                break;
+              case "NEED_SPCS_ORIGIN":
+                sendSpcsBackendOrigin();
+                break;
+              case "CLIENT_ERROR":
+                // Event emitted when the service worker fails to fetch a valid response (either a
+                // bad response code or an exception).
+                if (window.__snowsight && window.__snowsight.STREAMLIT_EMBED_MODE === true) {
+                  window.postMessage(event.data, window.location.origin);
+                } else {
+                  window.parent.postMessage(event.data, window.__snowsight.STREAMLIT_PREAMBLE_PARENT_ORIGIN);
+                }
+                break;
+              case "SW_RECEIVED_AUTH_TOKEN":
+                sendMessageToParent(event.data.type, event.data);
+                break;
+            }
+          });
+
+          if (enableStreamlitSpcsRuntimeV2) {
+            // Notify listeners that there is a service worker controlling the page and is ready to
+            // service requests. This is used to ensure that any network requests on the first load
+            // before a service worker is controlling the page are sent with a valid token. This
+            // does not guarantee that the service worker that was just registered is controlling
+            // the current page.
+            if (navigator.serviceWorker.controller) {
+              swReadyResolver();
+            } else {
+              navigator.serviceWorker.addEventListener("controllerchange", (_unused) => {
+                swReadyResolver();
+              });
+            }
+          }
+
+          // Record the time to fetch and register the service worker
+          await sendMessageToParent("SERVICE_WORKER_LOADED", {
+            registrationTimeMs: registrationEnd - registrationStart,
+          });
+
+          // Send initialization info to the service worker.
+          await sendSpcsBackendOrigin();
+
+          // GS token refresh is required to ensure file uploader works in vPrev.
+          await sendMessageToParent(tokenDataByType.gs.requestMessageType)
+
+          // Request the SPCS token on start if using the v2 runtime.
+          if (enableStreamlitSpcsRuntimeV2) {
+            await sendMessageToParent(tokenDataByType.spcs.requestMessageType);
+          }
+        })
+        .catch((error) => {
+          // eslint-disable-next-line no-console
+          console.error(
+            `Streamlit service worker registration failed: ${error}`
+          );
+
+          sendMessageToParent("SERVICE_WORKER_INIT_FAILED", {
+            errorMessage: error.toString(),
+          });
+        });
+  }
+
+  /**
+   * Ensures that the service worker has a valid token. 
+   * 
+   * If the token is older, this will instead send the given
+   * message to the parent frame (Snowsight) and let the response event handler
+   * send the token instead.
+   * 
+   * If the given token is newer than `workerApiTokenExpiresAt` (within TOKEN_EXPIRY_BUFFER_MS),
+   * this will immediately send a message to the service worker with the given
+   * token value. 
+   *
+   * Returns the promise for the message sent.
+   */
+  function ensureTokenValid(workerTokenExpiresAt, tokenData) {
+    if (!tokenData.token ||
+        workerTokenExpiresAt >= tokenData.expiresAt - TOKEN_EXPIRY_BUFFER_MS) {
+      // No token or the token is old.
+      return sendMessageToParent(tokenData.requestMessageType);
+    } else {
+      // We have a newer token than the worker; send it.
+      return sendTokenToServiceWorker(tokenData);
+    }
+  }
+
+  /**
+   * Guards token-setter messages in embed mode: only trusts window.self at same origin
+   * (origin is browser-set, unforgeable). Non-embed returns true unconditionally
+   * (Snowsight parent, already gated by frame-ancestors CSP).
+   */
+  function isTrustedTokenSender(event) {
+    if (!(window.__snowsight && window.__snowsight.STREAMLIT_EMBED_MODE === true)) {
+      return true;
+    }
+    return event.source === window && event.origin === window.location.origin;
+  }
+
+  /**
+   * Listens to "message" events from Snowsight.
+   *
+   * @param event - message event
+   */
+  async function handleMessageEvent(event) {
+    const messageType = event.data && event.data.type;
+    const isTokenSetter =
+        messageType === "SNOWFLAKE_SET_API_TOKEN" ||
+        messageType === "SNOWFLAKE_SET_GS_API_TOKEN" ||
+        messageType === "SNOWFLAKE_SET_SPCS_API_TOKEN";
+    if (isTokenSetter && !isTrustedTokenSender(event)) {
+      // eslint-disable-next-line no-console
+      console.warn(
+        "Streamlit: ignored token-setter message from untrusted sender",
+        {messageType, origin: event.origin}
+      );
+      // Surface rejection to the embed adapter via self-post (avoids a new cross-frame contract).
+      window.postMessage(
+        {type: "STREAMLIT_EMBED_TOKEN_SENDER_REJECTED", messageType, rejectedOrigin: event.origin},
+        window.location.origin
+      );
+      return;
+    }
+    switch (messageType) {
+      case "SNOWFLAKE_SET_API_TOKEN": {
+        await handleSetTokenInternalMessage(event.data, tokenDataByType.legacyApi);
+        break;
+      }
+      case "SNOWFLAKE_SET_GS_API_TOKEN": {
+        await handleSetTokenInternalMessage(event.data, tokenDataByType.gs);
+        break;
+      }
+      case "SNOWFLAKE_SET_SPCS_API_TOKEN": {
+        await handleSetTokenInternalMessage(event.data, tokenDataByType.spcs);
+        break;
+      }
+    }
+  }
+
+  async function handleSetTokenInternalMessage(message, tokenData) {
+    // Cache the result, if it's fresher than what we have saved.
+    if (message.apiTokenExpiresAt > tokenData.expiresAt) {
+      tokenData.token = message.apiToken;
+      tokenData.expiresAt = message.apiTokenExpiresAt;
+    }
+    await sendTokenToServiceWorker(tokenData);
+  }
+
+  /**
+   * Sends a ADD_SPCS_BACKEND_ORIGIN message to the active service worker with the SPCS origin for
+   * this controller, or `undefined` if this is not a vNext app. Does nothing if the app is not
+   * ready, as we won't have a valid backend origin.
+   */
+  async function sendSpcsBackendOrigin() {
+    if (appReady) {
+      const data = {type: "ADD_SPCS_BACKEND_ORIGIN"};
+      if (enableStreamlitSpcsRuntimeV2) {
+        data.spcsBackendOrigin = window.__streamlit.BACKEND_BASE_URL;
+      }
+      await sendMessageToServiceWorker(data);
+    }
+  }
+
+  /** Sends the given token to the active service worker. */
+  async function sendTokenToServiceWorker(tokenData) {
+    await sendMessageToServiceWorker({
+      type: tokenData.sendMessageType,
+      apiToken: tokenData.token,
+      apiTokenExpiresAt: tokenData.expiresAt,
+    });
+  }
+
+  async function sendMessageToServiceWorker(message) {
+    // Wait until we have an active worker.
+    const serviceWorkerRegistration = await navigator.serviceWorker.ready;
+    if (serviceWorkerRegistration.active === null) {
+      const errorMessage = "Failed to send message to Streamlit service worker. No active service worker found.";
+
+      // eslint-disable-next-line no-console
+      console.error(errorMessage);
+
+      await sendMessageToParent("SERVICE_WORKER_ERROR", {
+        errorMessage,
+      });
+
+      return;
+    }
+
+    // Post to the currently active worker. Note that this will skip installing workers; these will
+    // request initialization after they start handling events.
+    serviceWorkerRegistration.active.postMessage(message);
+  }
+
+  async function sendMessageToParent(type, data = {}) {
+    const message = {
+      type,
+      ...data,
+      stCommVersion: ST_COMM_VERSION,
+    }
+    if (window.__snowsight && window.__snowsight.STREAMLIT_EMBED_MODE === true) {
+      // Embed mode: iframe's window.parent is the third-party embedder with no Snowsight handler.
+      window.postMessage(message, window.location.origin);
+    } else {
+      window.parent.postMessage(message, window.__snowsight.STREAMLIT_PREAMBLE_PARENT_ORIGIN);
+    }
+  }
+  
+  registerServiceWorker();
+</script>
+
+    <link rel="modulepreload" href="./streamlitPreambleV2.260622-1-f2d77d1f6cd.js" crossorigin="">
+<link rel="modulepreload" href="./index.js" crossorigin="">
+
+    <link rel="preload" href="https://app.snowflake.com/static/streamlit/1.52.2/static/media/SourceSansVF-Upright.ttf.woff2" as="font" type="font/woff2" crossorigin="">
+
+
+    <link rel="stylesheet" href="./index.css">
+    <link rel="shortcut icon" href="https://st4z76sg6mjnpe5d4k67di.awsapsouth1.snowflake.app/a0952471792471/unominda/favicon.png">
+    
+    <script type="module" src="./streamlitPreambleV2.260622-1-f2d77d1f6cd.js" onerror="reportScriptLoadError(this.src)" crossorigin=""></script>
+
+  <script src="./index.js" type="module"></script><style media=""></style><style data-emotion="st-emotion-cache-global" data-s=""></style><style data-emotion="st-emotion-cache-global" data-s=""></style><style data-emotion="st-emotion-cache" data-s=""></style><link rel="modulepreload" as="script" crossorigin="" href="https://app.snowflake.com/static/streamlit/1.52.2/static/js/index46.js"><link rel="modulepreload" as="script" crossorigin="" href="https://app.snowflake.com/static/streamlit/1.52.2/static/js/index27.js"><link rel="modulepreload" as="script" crossorigin="" href="https://app.snowflake.com/static/streamlit/1.52.2/static/js/index6.js"><link rel="modulepreload" as="script" crossorigin="" href="https://app.snowflake.com/static/streamlit/1.52.2/static/js/useBasicWidgetState.js"><link rel="modulepreload" as="script" crossorigin="" href="https://app.snowflake.com/static/streamlit/1.52.2/static/js/FormClearHelper.js"><link rel="modulepreload" as="script" crossorigin="" href="https://app.snowflake.com/static/streamlit/1.52.2/static/js/index24.js"><link rel="modulepreload" as="script" crossorigin="" href="https://app.snowflake.com/static/streamlit/1.52.2/static/js/withFullScreenWrapper.js"><link rel="modulepreload" as="script" crossorigin="" href="https://app.snowflake.com/static/streamlit/1.52.2/static/js/Toolbar.js"><link rel="modulepreload" as="script" crossorigin="" href="https://app.snowflake.com/static/streamlit/1.52.2/static/js/moment.js"><link rel="modulepreload" as="script" crossorigin="" href="https://app.snowflake.com/static/streamlit/1.52.2/static/js/pandasStylerUtils.js"><link rel="modulepreload" as="script" crossorigin="" href="https://app.snowflake.com/static/streamlit/1.52.2/static/js/_baseIndexOf.js"><link rel="modulepreload" as="script" crossorigin="" href="https://app.snowflake.com/static/streamlit/1.52.2/static/js/sprintf.js"><link rel="modulepreload" as="script" crossorigin="" href="https://app.snowflake.com/static/streamlit/1.52.2/static/js/index2.js"><link rel="modulepreload" as="script" crossorigin="" href="https://app.snowflake.com/static/streamlit/1.52.2/static/js/main.js"><link rel="modulepreload" as="script" crossorigin="" href="https://app.snowflake.com/static/streamlit/1.52.2/static/js/throttle.js"><link rel="modulepreload" as="script" crossorigin="" href="https://app.snowflake.com/static/streamlit/1.52.2/static/js/checkbox.js"><link rel="modulepreload" as="script" crossorigin="" href="https://app.snowflake.com/static/streamlit/1.52.2/static/js/createDownloadLinkElement.js"><link rel="modulepreload" as="script" crossorigin="" href="https://app.snowflake.com/static/streamlit/1.52.2/static/js/toConsumableArray.js"><link rel="modulepreload" as="script" crossorigin="" href="https://app.snowflake.com/static/streamlit/1.52.2/static/js/possibleConstructorReturn.js"><link rel="modulepreload" as="script" crossorigin="" href="https://app.snowflake.com/static/streamlit/1.52.2/static/js/createSuper.js"><link rel="modulepreload" as="script" crossorigin="" href="https://app.snowflake.com/static/streamlit/1.52.2/static/js/FileDownload.esm.js"><link rel="modulepreload" as="script" crossorigin="" href="https://app.snowflake.com/static/streamlit/1.52.2/static/js/_arrayIncludes.js"><link rel="stylesheet" crossorigin="" href="./index.DgR7E2CV.css"></head>
+  <body>
+    <noscript>You need to enable JavaScript to run this app.</noscript>
+    <div id="preambleRoot"></div>
+    <div id="root"><div class=""><div class="withScreencast" data-testid="stScreencast"><div class="stApp stAppEmbeddingId-th6ynrd1kg62 streamlit-embedded streamlit-wide st-emotion-cache-1e052du ee4bbma0" data-testid="stApp" data-test-script-state="notRunning" data-test-connection-state="CONNECTED"><div class="stAppViewContainer appview-container st-emotion-cache-1yiq2ps e4man110" data-testid="stAppViewContainer" data-layout="wide"><div class="st-emotion-cache-6px8kg e4man1110"><header class="stAppHeader st-emotion-cache-dzki4f e1o8oa9v1" data-testid="stHeader"></header><section tabindex="0" class="stMain st-emotion-cache-4rsbii e4man111" data-testid="stMain"><div class="stMainBlockContainer block-container st-emotion-cache-zy6yx3 e4man114" data-testid="stMainBlockContainer"><div direction="column" height="auto" class="stVerticalBlock st-emotion-cache-tn0cau ek2vi383" data-testid="stVerticalBlock"><div class="stElementContainer element-container st-emotion-cache-3pwa5w ek2vi381" data-testid="stElementContainer" data-stale="false" width="100%" height="auto" overflow="visible"><div class="stMarkdown" data-testid="stMarkdown"><div class="st-emotion-cache-6c7yup eoo3rg91"><div data-testid="stMarkdownContainer" class="st-emotion-cache-19d5tm7 eqpbrs00"><style>
+.header-bar {
+  display: flex;
+  align-items: center;
+  background: linear-gradient(135deg, #1B2838 0%, #2C3E50 100%);
+  padding: 20px 30px;
+  border-radius: 10px;
+  margin-bottom: 20px;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+.header-bar img { height: 50px; margin-right: 20px; }
+.header-title {
+  font-size: 28px;
+  font-weight: 700;
+  color: #ffffff;
+  margin: 0;
+  flex-grow: 1;
+  text-align: center;
+}
+.stTabs [data-baseweb="tab-list"] { gap: 8px; }
+.stTabs [data-baseweb="tab"] { padding: 10px 20px; border-radius: 8px 8px 0 0; }
+</style></div></div></div></div><div class="stElementContainer element-container st-emotion-cache-3pwa5w ek2vi381" data-testid="stElementContainer" data-stale="false" width="100%" height="auto" overflow="visible"><div class="stMarkdown" data-testid="stMarkdown"><div class="st-emotion-cache-6c7yup eoo3rg91"><div data-testid="stMarkdownContainer" class="st-emotion-cache-19d5tm7 eqpbrs00"><div class="header-bar">
+  <p class="header-title">Deviation Dashboard</p>
+</div></div></div></div></div><div class="stTabs st-emotion-cache-8atqhb e1mp0uwq0" data-testid="stTabs" width="100%"><div class="st-ae"><div class=""><div data-baseweb="tab-list" role="tablist" aria-orientation="horizontal" class="st-af st-ag st-ah st-ai st-aj st-ak st-al st-am st-an st-ao st-ap st-aq st-ar"><button data-baseweb="tab" id="tabs-bui1-tab-0" role="tab" aria-selected="false" aria-controls="tabs-bui1-tabpanel-0" tabindex="-1" type="button" data-testid="stTab" class="st-as st-at st-au st-av st-aw st-ax st-ay st-az st-b0 st-b1 st-b2 st-b3 st-b4 st-b5 st-b6 st-b7 st-b8 st-b9 st-ba st-bb st-bc st-c1 st-be st-bf st-bg st-bh st-bi st-bj st-bk st-bl st-bm st-bn st-bo st-bp st-bq st-br st-bs st-bt st-bu st-bv st-bw st-bx st-by st-bz st-c0"><div data-testid="stMarkdownContainer" class="st-emotion-cache-1f5y85w eqpbrs00"><p>📋 Plan Dashboard</p></div></button><button data-baseweb="tab" id="tabs-bui1-tab-1" role="tab" aria-selected="true" aria-controls="tabs-bui1-tabpanel-1" tabindex="0" type="button" data-testid="stTab" class="st-as st-at st-au st-av st-aw st-ax st-ay st-az st-b0 st-b1 st-b2 st-b3 st-b4 st-b5 st-b6 st-b7 st-b8 st-b9 st-ba st-bb st-bc st-bd st-be st-bf st-bg st-bh st-bi st-bj st-bk st-bl st-bm st-bn st-bo st-bp st-bq st-br st-bs st-bt st-bu st-bv st-bw st-bx st-by st-bz st-c0"><div data-testid="stMarkdownContainer" class="st-emotion-cache-1f5y85w eqpbrs00"><p>📊 Firm Dashboard</p></div></button><div data-baseweb="tab-highlight" aria-hidden="true" role="presentation" class="st-c2 st-c3 st-c4 st-c5 st-c6 st-c7 st-ec st-ed st-e7 st-ee st-ef"></div></div></div><div data-baseweb="tab-border" aria-hidden="true" role="presentation" class="st-ca st-af st-c7"></div><div data-baseweb="tab-panel" role="tabpanel" id="tabs-bui1-tabpanel-0" aria-labelledby="tabs-bui1-tab-0" class="st-ai st-bi st-cb st-b3 st-b4 st-b1" hidden=""><div direction="column" height="auto" class="stVerticalBlock st-emotion-cache-tn0cau ek2vi383" data-testid="stVerticalBlock"><div class="stElementContainer element-container st-emotion-cache-ow95j9 ek2vi381" data-testid="stElementContainer" data-stale="false" width="auto" height="auto" overflow="visible"><div class="stEmpty" data-testid="stEmpty"></div></div><div data-testid="stLayoutWrapper" width="100%" height="auto" overflow="visible" class="st-emotion-cache-18kf3ut ek2vi384"><div direction="row" overflow="visible" height="auto" class="stHorizontalBlock st-emotion-cache-1permvm ek2vi383" data-testid="stHorizontalBlock" data-test-scroll-behavior="normal"><div class="stColumn st-emotion-cache-1u0jk1s ek2vi382" data-testid="stColumn"><div direction="column" height="100%" class="stVerticalBlock st-emotion-cache-wfksaw ek2vi383" data-testid="stVerticalBlock"><div class="stElementContainer element-container st-key-plan_client st-emotion-cache-1vo6xi6 ek2vi381" data-testid="stElementContainer" data-stale="false" width="100%" height="auto" overflow="visible"><div class="stSelectbox" data-testid="stSelectbox"><label data-testid="stWidgetLabel" aria-hidden="true" class="st-emotion-cache-1u25fy1 e1gk92lc0"><div data-testid="stMarkdownContainer" class="st-emotion-cache-1f5y85w eqpbrs00"><p>Client ID</p></div></label><div data-baseweb="select" class="st-bp st-cf st-cg st-ch st-bt st-bu st-ay st-af st-ci"><div class="st-cj st-ck st-cl st-cm st-ay st-cn st-ci st-ag st-co st-cp st-cq st-cr st-cs st-ct st-cu st-cv st-cw st-cx st-cy st-bg st-cz st-c1 st-d0 st-d1 st-d2 st-d3 st-d4 st-bw"><div class="st-ay st-af st-ai st-d5 st-d6 st-ag st-b0 st-ah st-cn st-d7 st-d8 st-d9 st-da"><div value="All" class="st-db st-ay st-au st-dc st-dd st-cn st-de st-bx st-df">All</div><div class="st-af st-dg st-dd st-dh st-b9 st-ba st-bb st-bc st-di st-ay st-bi st-aw st-ax st-dj st-av st-b2 st-b4 st-b1 st-b3 st-dk st-dl"><input aria-autocomplete="list" aria-expanded="false" aria-haspopup="listbox" aria-label="Selected All. Client ID" role="combobox" tabindex="0" class="st-bp st-cf st-br st-ch st-bt st-bu st-c1 st-dm st-dz st-dd st-be st-b9 st-ba st-bb st-bc st-di st-dg st-bi st-aw st-ax st-au st-av st-b2 st-b4 st-b1 st-b3" value=""><div class="st-bp st-cf st-br st-ch st-bt st-bu st-c3 st-do st-dp st-dq st-dr st-ds st-dt"></div></div></div><div class="st-ay st-af st-ag st-du st-b0 st-dv st-da"><svg data-baseweb="icon" title="open" viewBox="0 0 24 24" class="st-dg st-dw st-c1 st-dx st-dy"><title>open</title><path transform="rotate(270, 12, 12)" fill-rule="evenodd" clip-rule="evenodd" d="M9 12C9 12.2652 9.10536 12.5196 9.29289 12.7071L13.2929 16.7071C13.6834 17.0976 14.3166 17.0976 14.7071 16.7071C15.0976 16.3166 15.0976 15.6834 14.7071 15.2929L11.4142 12L14.7071 8.70711C15.0976 8.31658 15.0976 7.68342 14.7071 7.29289C14.3166 6.90237 13.6834 6.90237 13.2929 7.29289L9.29289 11.2929C9.10536 11.4804 9 11.7348 9 12Z"></path></svg></div></div></div></div></div></div></div><div class="stColumn st-emotion-cache-1u0jk1s ek2vi382" data-testid="stColumn"><div direction="column" height="100%" class="stVerticalBlock st-emotion-cache-wfksaw ek2vi383" data-testid="stVerticalBlock"><div class="stElementContainer element-container st-key-plan_part st-emotion-cache-1vo6xi6 ek2vi381" data-testid="stElementContainer" data-stale="false" width="100%" height="auto" overflow="visible"><div class="stSelectbox" data-testid="stSelectbox"><label data-testid="stWidgetLabel" aria-hidden="true" class="st-emotion-cache-1u25fy1 e1gk92lc0"><div data-testid="stMarkdownContainer" class="st-emotion-cache-1f5y85w eqpbrs00"><p>Part Number (Drill Down)</p></div></label><div data-baseweb="select" class="st-bp st-cf st-cg st-ch st-bt st-bu st-ay st-af st-ci"><div class="st-cj st-ck st-cl st-cm st-ay st-cn st-ci st-ag st-co st-cp st-cq st-cr st-cs st-ct st-cu st-cv st-cw st-cx st-cy st-bg st-cz st-c1 st-d0 st-d1 st-d2 st-d3 st-d4 st-bw"><div class="st-ay st-af st-ai st-d5 st-d6 st-ag st-b0 st-ah st-cn st-d7 st-d8 st-d9 st-da"><div value="All" class="st-db st-ay st-au st-dc st-dd st-cn st-de st-bx st-df">All</div><div class="st-af st-dg st-dd st-dh st-b9 st-ba st-bb st-bc st-di st-ay st-bi st-aw st-ax st-dj st-av st-b2 st-b4 st-b1 st-b3 st-dk st-dl"><input aria-autocomplete="list" aria-expanded="false" aria-haspopup="listbox" aria-label="Selected All. Part Number (Drill Down)" role="combobox" tabindex="0" class="st-bp st-cf st-br st-ch st-bt st-bu st-c1 st-dm st-dz st-dd st-be st-b9 st-ba st-bb st-bc st-di st-dg st-bi st-aw st-ax st-au st-av st-b2 st-b4 st-b1 st-b3" value=""><div class="st-bp st-cf st-br st-ch st-bt st-bu st-c3 st-do st-dp st-dq st-dr st-ds st-dt"></div></div></div><div class="st-ay st-af st-ag st-du st-b0 st-dv st-da"><svg data-baseweb="icon" title="open" viewBox="0 0 24 24" class="st-dg st-dw st-c1 st-dx st-dy"><title>open</title><path transform="rotate(270, 12, 12)" fill-rule="evenodd" clip-rule="evenodd" d="M9 12C9 12.2652 9.10536 12.5196 9.29289 12.7071L13.2929 16.7071C13.6834 17.0976 14.3166 17.0976 14.7071 16.7071C15.0976 16.3166 15.0976 15.6834 14.7071 15.2929L11.4142 12L14.7071 8.70711C15.0976 8.31658 15.0976 7.68342 14.7071 7.29289C14.3166 6.90237 13.6834 6.90237 13.2929 7.29289L9.29289 11.2929C9.10536 11.4804 9 11.7348 9 12Z"></path></svg></div></div></div></div></div></div></div><div class="stColumn st-emotion-cache-1vyjpxn ek2vi382" data-testid="stColumn"><div direction="column" height="100%" class="stVerticalBlock st-emotion-cache-wfksaw ek2vi383" data-testid="stVerticalBlock"><div class="stElementContainer element-container st-emotion-cache-3pwa5w ek2vi381" data-testid="stElementContainer" data-stale="false" width="100%" height="auto" overflow="visible"><div class="stMarkdown" data-testid="stMarkdown"><div class="st-emotion-cache-6c7yup eoo3rg91"><div data-testid="stMarkdownContainer" class="st-emotion-cache-19d5tm7 eqpbrs00"><p><strong>Data as of (Latest):</strong> 06-23-26 06:57 &nbsp; | &nbsp; <strong>Parts:</strong> 41</p></div></div></div></div></div></div></div></div><div class="stElementContainer element-container st-emotion-cache-1bdwub8 ek2vi381" data-testid="stElementContainer" data-stale="false" width="100%" height="500px" overflow="visible"><div data-testid="stFullScreenFrame" class="st-emotion-cache-uwwqev e13s7uld0"><div class="stDataFrame st-emotion-cache-12yo0lz eofyeyo0" data-testid="stDataFrame"><div class="stElementToolbar st-emotion-cache-fx267q ekeylwq0" data-testid="stElementToolbar" target=".eofyeyo0"><div data-testid="stElementToolbarButtonContainer" class="st-emotion-cache-1mrwaa9 ekeylwq1"><div aria-haspopup="true" aria-expanded="false"><div data-testid="stElementToolbarButton"><div data-testid="stTooltipHoverTarget" class="stTooltipHoverTarget" id="bui15__anchor" style="display: flex; flex-direction: row; justify-content: flex-end; width: auto;"><button kind="elementToolbar" data-testid="stBaseButton-elementToolbar" aria-label="Show/hide columns" class="st-emotion-cache-vhb6s8 e1q4kxr420"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="currentColor" xmlns="http://www.w3.org/2000/svg" data-testid="stElementToolbarButtonIcon" class="e1ob5mq01 st-emotion-cache-1u2dcfn ex0cdmw0"><path fill="none" d="M0 0h24v24H0V0z"></path><path d="M12 6a9.77 9.77 0 018.82 5.5C19.17 14.87 15.79 17 12 17s-7.17-2.13-8.82-5.5A9.77 9.77 0 0112 6m0-2C7 4 2.73 7.11 1 11.5 2.73 15.89 7 19 12 19s9.27-3.11 11-7.5C21.27 7.11 17 4 12 4zm0 5a2.5 2.5 0 010 5 2.5 2.5 0 010-5m0-2c-2.48 0-4.5 2.02-4.5 4.5S9.52 16 12 16s4.5-2.02 4.5-4.5S14.48 7 12 7z"></path></svg></button></div></div></div><div data-testid="stElementToolbarButton"><div data-testid="stTooltipHoverTarget" class="stTooltipHoverTarget" id="bui16__anchor" style="display: flex; flex-direction: row; justify-content: flex-end; width: auto;"><button kind="elementToolbar" data-testid="stBaseButton-elementToolbar" aria-label="Download as CSV" class="st-emotion-cache-vhb6s8 e1q4kxr420"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="currentColor" xmlns="http://www.w3.org/2000/svg" data-testid="stElementToolbarButtonIcon" class="e1ob5mq01 st-emotion-cache-1u2dcfn ex0cdmw0"><rect width="24" height="24" fill="none"></rect><path d="M18 15v3H6v-3H4v3c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2v-3h-2zm-1-4l-1.41-1.41L13 12.17V4h-2v8.17L8.41 9.59 7 11l5 5 5-5z"></path></svg></button></div></div><div data-testid="stElementToolbarButton"><div data-testid="stTooltipHoverTarget" class="stTooltipHoverTarget" id="bui17__anchor" style="display: flex; flex-direction: row; justify-content: flex-end; width: auto;"><button kind="elementToolbar" data-testid="stBaseButton-elementToolbar" aria-label="Search" class="st-emotion-cache-vhb6s8 e1q4kxr420"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="currentColor" xmlns="http://www.w3.org/2000/svg" data-testid="stElementToolbarButtonIcon" class="e1ob5mq01 st-emotion-cache-1u2dcfn ex0cdmw0"><path fill="none" d="M0 0h24v24H0V0z"></path><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0016 9.5 6.5 6.5 0 109.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"></path></svg></button></div></div><div data-testid="stElementToolbarButton"><div data-testid="stTooltipHoverTarget" class="stTooltipHoverTarget" id="bui18__anchor" style="display: flex; flex-direction: row; justify-content: flex-end; width: auto;"><button kind="elementToolbar" data-testid="stBaseButton-elementToolbar" aria-label="Fullscreen" class="st-emotion-cache-vhb6s8 e1q4kxr420"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="currentColor" xmlns="http://www.w3.org/2000/svg" data-testid="stElementToolbarButtonIcon" class="e1ob5mq01 st-emotion-cache-1u2dcfn ex0cdmw0"><path fill="none" d="M0 0h24v24H0V0z"></path><path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"></path></svg></button></div></div></div></div><div data-testid="stDataFrameResizable" style="position: relative; user-select: auto; border: 1px solid rgba(213, 218, 228, 0.45); border-radius: 0.5rem; width: 52px; height: 500px; max-width: 52px; max-height: 8647px; min-width: 52px; min-height: 72px; box-sizing: border-box; flex-shrink: 0;"><div class="stDataFrameGlideDataEditor gdg-wmyidgi" style="--wmyidgi-0: 4705px; --wmyidgi-1: 8645px; --gdg-accent-color: #1a6ce7; --gdg-accent-fg: #ffffff; --gdg-accent-light: rgba(26, 108, 231, 0.1); --gdg-text-dark: #1e252f; --gdg-text-medium: rgba(30, 37, 47, 0.8); --gdg-text-light: rgba(30, 37, 47, 0.4); --gdg-text-bubble: rgba(30, 37, 47, 0.6); --gdg-bg-icon-header: rgba(30, 37, 47, 0.6); --gdg-fg-icon-header: #ffffff; --gdg-text-header: rgba(30, 37, 47, 0.6); --gdg-text-group-header: rgba(30, 37, 47, 0.6); --gdg-bg-group-header: rgba(248, 249, 251, 1); --gdg-bg-group-header-hovered: rgba(173, 173, 173, 0.1); --gdg-text-header-selected: #ffffff; --gdg-bg-cell: #ffffff; --gdg-bg-cell-medium: #ffffff; --gdg-bg-header: rgba(248, 249, 251, 1); --gdg-bg-header-has-focus: rgba(173, 173, 173, 0.1); --gdg-bg-header-hovered: rgba(173, 173, 173, 0.1); --gdg-bg-bubble: #f7f7f7; --gdg-bg-bubble-selected: hsla(0, 0%, 100%, 1); --gdg-bubble-height: 20px; --gdg-bubble-padding: 8px; --gdg-bubble-margin: 4px; --gdg-bg-search-result: rgba(26, 108, 231, 0.1); --gdg-border-color: rgba(213, 218, 228, 0.45); --gdg-horizontal-border-color: rgba(213, 218, 228, 0.45); --gdg-drilldown-border: rgba(173, 173, 173, 0.25); --gdg-link-color: #1a6ce7; --gdg-cell-horizontal-padding: 8px; --gdg-cell-vertical-padding: 3px; --gdg-header-font-style: 400 14px; --gdg-base-font-style: 400 14px; --gdg-marker-font-style: 9px; --gdg-font-family: Inter, Roboto, &#39;Helvetica Neue&#39;, &#39;Arial Nova&#39;, &#39;Nimbus Sans&#39;, Arial, sans-serif, &quot;Source Sans&quot;, sans-serif; --gdg-editor-font-size: 0.875rem; --gdg-checkbox-max-size: 16px; --gdg-resize-indicator-color: #1a6ce7;"><div></div></div><div><div style="position: absolute; user-select: none; width: 20px; height: 20px; z-index: 1; right: -10px; bottom: -10px; cursor: se-resize;"></div></div></div></div></div></div></div></div><div data-baseweb="tab-panel" role="tabpanel" id="tabs-bui1-tabpanel-1" aria-labelledby="tabs-bui1-tab-1" class="st-ai st-bi st-cb st-b3 st-b4 st-b1"><div direction="column" height="auto" class="stVerticalBlock st-emotion-cache-tn0cau ek2vi383" data-testid="stVerticalBlock"><div class="stElementContainer element-container st-emotion-cache-ow95j9 ek2vi381" data-testid="stElementContainer" data-stale="false" width="auto" height="auto" overflow="visible"><div class="stEmpty" data-testid="stEmpty"></div></div><div data-testid="stLayoutWrapper" width="100%" height="auto" overflow="visible" class="st-emotion-cache-18kf3ut ek2vi384"><div direction="row" overflow="visible" height="auto" class="stHorizontalBlock st-emotion-cache-1permvm ek2vi383" data-testid="stHorizontalBlock" data-test-scroll-behavior="normal"><div class="stColumn st-emotion-cache-1eveavj ek2vi382" data-testid="stColumn"><div direction="column" height="100%" class="stVerticalBlock st-emotion-cache-wfksaw ek2vi383" data-testid="stVerticalBlock"><div class="stElementContainer element-container st-key-firm_status st-emotion-cache-1vo6xi6 ek2vi381" data-testid="stElementContainer" data-stale="false" width="100%" height="auto" overflow="visible"><div class="stSelectbox" data-testid="stSelectbox"><label data-testid="stWidgetLabel" aria-hidden="true" class="st-emotion-cache-1u25fy1 e1gk92lc0"><div data-testid="stMarkdownContainer" class="st-emotion-cache-1f5y85w eqpbrs00"><p>Status</p></div></label><div data-baseweb="select" class="st-bp st-cf st-cg st-ch st-bt st-bu st-ay st-af st-ci"><div class="st-cj st-ck st-cl st-cm st-ay st-cn st-ci st-ag st-co st-cp st-cq st-cr st-cs st-ct st-cu st-cv st-cw st-cx st-cy st-bg st-cz st-c1 st-d0 st-d1 st-d2 st-d3 st-d4 st-bw"><div class="st-ay st-af st-ai st-d5 st-d6 st-ag st-b0 st-ah st-cn st-d7 st-d8 st-d9 st-da"><div value="All" class="st-db st-ay st-au st-dc st-dd st-cn st-de st-bx st-df">All</div><div class="st-af st-dg st-dd st-dh st-b9 st-ba st-bb st-bc st-di st-ay st-bi st-aw st-ax st-dj st-av st-b2 st-b4 st-b1 st-b3 st-dk st-dl"><input aria-autocomplete="list" aria-expanded="false" aria-haspopup="listbox" aria-label="Selected All. Status" role="combobox" tabindex="0" class="st-bp st-cf st-br st-ch st-bt st-bu st-c1 st-dm st-dz st-dd st-be st-b9 st-ba st-bb st-bc st-di st-dg st-bi st-aw st-ax st-au st-av st-b2 st-b4 st-b1 st-b3" value=""><div class="st-bp st-cf st-br st-ch st-bt st-bu st-c3 st-do st-dp st-dq st-dr st-ds st-dt"></div></div></div><div class="st-ay st-af st-ag st-du st-b0 st-dv st-da"><svg data-baseweb="icon" title="open" viewBox="0 0 24 24" class="st-dg st-dw st-c1 st-dx st-dy"><title>open</title><path transform="rotate(270, 12, 12)" fill-rule="evenodd" clip-rule="evenodd" d="M9 12C9 12.2652 9.10536 12.5196 9.29289 12.7071L13.2929 16.7071C13.6834 17.0976 14.3166 17.0976 14.7071 16.7071C15.0976 16.3166 15.0976 15.6834 14.7071 15.2929L11.4142 12L14.7071 8.70711C15.0976 8.31658 15.0976 7.68342 14.7071 7.29289C14.3166 6.90237 13.6834 6.90237 13.2929 7.29289L9.29289 11.2929C9.10536 11.4804 9 11.7348 9 12Z"></path></svg></div></div></div></div></div></div></div><div class="stColumn st-emotion-cache-16uurq8 ek2vi382" data-testid="stColumn"><div direction="column" height="100%" class="stVerticalBlock st-emotion-cache-wfksaw ek2vi383" data-testid="stVerticalBlock"><div class="stElementContainer element-container st-key-firm_issuer st-emotion-cache-1vo6xi6 ek2vi381" data-testid="stElementContainer" data-stale="false" width="100%" height="auto" overflow="visible"><div class="stSelectbox" data-testid="stSelectbox"><label data-testid="stWidgetLabel" aria-hidden="true" class="st-emotion-cache-1u25fy1 e1gk92lc0"><div data-testid="stMarkdownContainer" class="st-emotion-cache-1f5y85w eqpbrs00"><p>Issuer</p></div></label><div data-baseweb="select" class="st-bp st-cf st-cg st-ch st-bt st-bu st-ay st-af st-ci"><div class="st-cj st-ck st-cl st-cm st-ay st-cn st-ci st-ag st-co st-cp st-cq st-cr st-cs st-ct st-cu st-cv st-cw st-cx st-cy st-bg st-cz st-c1 st-d0 st-d1 st-d2 st-d3 st-d4 st-bw"><div class="st-ay st-af st-ai st-d5 st-d6 st-ag st-b0 st-ah st-cn st-d7 st-d8 st-d9 st-da"><div value="All" class="st-db st-ay st-au st-dc st-dd st-cn st-de st-bx st-df">All</div><div class="st-af st-dg st-dd st-dh st-b9 st-ba st-bb st-bc st-di st-ay st-bi st-aw st-ax st-dj st-av st-b2 st-b4 st-b1 st-b3 st-dk st-dl"><input aria-autocomplete="list" aria-expanded="false" aria-haspopup="listbox" aria-label="Selected All. Issuer" role="combobox" tabindex="0" class="st-bp st-cf st-br st-ch st-bt st-bu st-c1 st-dm st-dz st-dd st-be st-b9 st-ba st-bb st-bc st-di st-dg st-bi st-aw st-ax st-au st-av st-b2 st-b4 st-b1 st-b3" value=""><div class="st-bp st-cf st-br st-ch st-bt st-bu st-c3 st-do st-dp st-dq st-dr st-ds st-dt"></div></div></div><div class="st-ay st-af st-ag st-du st-b0 st-dv st-da"><svg data-baseweb="icon" title="open" viewBox="0 0 24 24" class="st-dg st-dw st-c1 st-dx st-dy"><title>open</title><path transform="rotate(270, 12, 12)" fill-rule="evenodd" clip-rule="evenodd" d="M9 12C9 12.2652 9.10536 12.5196 9.29289 12.7071L13.2929 16.7071C13.6834 17.0976 14.3166 17.0976 14.7071 16.7071C15.0976 16.3166 15.0976 15.6834 14.7071 15.2929L11.4142 12L14.7071 8.70711C15.0976 8.31658 15.0976 7.68342 14.7071 7.29289C14.3166 6.90237 13.6834 6.90237 13.2929 7.29289L9.29289 11.2929C9.10536 11.4804 9 11.7348 9 12Z"></path></svg></div></div></div></div></div></div></div><div class="stColumn st-emotion-cache-16uurq8 ek2vi382" data-testid="stColumn"><div direction="column" height="100%" class="stVerticalBlock st-emotion-cache-wfksaw ek2vi383" data-testid="stVerticalBlock"><div class="stElementContainer element-container st-key-firm_client st-emotion-cache-1vo6xi6 ek2vi381" data-testid="stElementContainer" data-stale="false" width="100%" height="auto" overflow="visible"><div class="stSelectbox" data-testid="stSelectbox"><label data-testid="stWidgetLabel" aria-hidden="true" class="st-emotion-cache-1u25fy1 e1gk92lc0"><div data-testid="stMarkdownContainer" class="st-emotion-cache-1f5y85w eqpbrs00"><p>Client ID</p></div></label><div data-baseweb="select" class="st-bp st-cf st-cg st-ch st-bt st-bu st-ay st-af st-ci"><div class="st-cj st-ck st-cl st-cm st-ay st-cn st-ci st-ag st-co st-cp st-cq st-cr st-cs st-ct st-cu st-cv st-cw st-cx st-cy st-bg st-cz st-c1 st-d0 st-d1 st-d2 st-d3 st-d4 st-bw"><div class="st-ay st-af st-ai st-d5 st-d6 st-ag st-b0 st-ah st-cn st-d7 st-d8 st-d9 st-da"><div value="All" class="st-db st-ay st-au st-dc st-dd st-cn st-de st-bx st-df">All</div><div class="st-af st-dg st-dd st-dh st-b9 st-ba st-bb st-bc st-di st-ay st-bi st-aw st-ax st-dj st-av st-b2 st-b4 st-b1 st-b3 st-dk st-dl"><input aria-autocomplete="list" aria-expanded="false" aria-haspopup="listbox" aria-label="Selected All. Client ID" role="combobox" tabindex="0" class="st-bp st-cf st-br st-ch st-bt st-bu st-c1 st-dm st-dz st-dd st-be st-b9 st-ba st-bb st-bc st-di st-dg st-bi st-aw st-ax st-au st-av st-b2 st-b4 st-b1 st-b3" value=""><div class="st-bp st-cf st-br st-ch st-bt st-bu st-c3 st-do st-dp st-dq st-dr st-ds st-dt"></div></div></div><div class="st-ay st-af st-ag st-du st-b0 st-dv st-da"><svg data-baseweb="icon" title="open" viewBox="0 0 24 24" class="st-dg st-dw st-c1 st-dx st-dy"><title>open</title><path transform="rotate(270, 12, 12)" fill-rule="evenodd" clip-rule="evenodd" d="M9 12C9 12.2652 9.10536 12.5196 9.29289 12.7071L13.2929 16.7071C13.6834 17.0976 14.3166 17.0976 14.7071 16.7071C15.0976 16.3166 15.0976 15.6834 14.7071 15.2929L11.4142 12L14.7071 8.70711C15.0976 8.31658 15.0976 7.68342 14.7071 7.29289C14.3166 6.90237 13.6834 6.90237 13.2929 7.29289L9.29289 11.2929C9.10536 11.4804 9 11.7348 9 12Z"></path></svg></div></div></div></div></div></div></div><div class="stColumn st-emotion-cache-16uurq8 ek2vi382" data-testid="stColumn"><div direction="column" height="100%" class="stVerticalBlock st-emotion-cache-wfksaw ek2vi383" data-testid="stVerticalBlock"><div class="stElementContainer element-container st-key-firm_part st-emotion-cache-1vo6xi6 ek2vi381" data-testid="stElementContainer" data-stale="false" width="100%" height="auto" overflow="visible"><div class="stSelectbox" data-testid="stSelectbox"><label data-testid="stWidgetLabel" aria-hidden="true" class="st-emotion-cache-1u25fy1 e1gk92lc0"><div data-testid="stMarkdownContainer" class="st-emotion-cache-1f5y85w eqpbrs00"><p>Part Number (Drill Down)</p></div></label><div data-baseweb="select" class="st-bp st-cf st-cg st-ch st-bt st-bu st-ay st-af st-ci"><div class="st-cj st-ck st-cl st-cm st-ay st-cn st-ci st-ag st-co st-cp st-cq st-cr st-cs st-ct st-cu st-cv st-cw st-cx st-cy st-bg st-cz st-c1 st-d0 st-d1 st-d2 st-d3 st-d4 st-bw"><div class="st-ay st-af st-ai st-d5 st-d6 st-ag st-b0 st-ah st-cn st-d7 st-d8 st-d9 st-da"><div value="All" class="st-db st-ay st-au st-dc st-dd st-cn st-de st-bx st-df">All</div><div class="st-af st-dg st-dd st-dh st-b9 st-ba st-bb st-bc st-di st-ay st-bi st-aw st-ax st-dj st-av st-b2 st-b4 st-b1 st-b3 st-dk st-dl"><input aria-autocomplete="list" aria-expanded="false" aria-haspopup="listbox" aria-label="Selected All. Part Number (Drill Down)" role="combobox" tabindex="0" class="st-bp st-cf st-br st-ch st-bt st-bu st-c1 st-dm st-dz st-dd st-be st-b9 st-ba st-bb st-bc st-di st-dg st-bi st-aw st-ax st-au st-av st-b2 st-b4 st-b1 st-b3" value=""><div class="st-bp st-cf st-br st-ch st-bt st-bu st-c3 st-do st-dp st-dq st-dr st-ds st-dt"></div></div></div><div class="st-ay st-af st-ag st-du st-b0 st-dv st-da"><svg data-baseweb="icon" title="open" viewBox="0 0 24 24" class="st-dg st-dw st-c1 st-dx st-dy"><title>open</title><path transform="rotate(270, 12, 12)" fill-rule="evenodd" clip-rule="evenodd" d="M9 12C9 12.2652 9.10536 12.5196 9.29289 12.7071L13.2929 16.7071C13.6834 17.0976 14.3166 17.0976 14.7071 16.7071C15.0976 16.3166 15.0976 15.6834 14.7071 15.2929L11.4142 12L14.7071 8.70711C15.0976 8.31658 15.0976 7.68342 14.7071 7.29289C14.3166 6.90237 13.6834 6.90237 13.2929 7.29289L9.29289 11.2929C9.10536 11.4804 9 11.7348 9 12Z"></path></svg></div></div></div></div></div></div></div><div class="stColumn st-emotion-cache-tzmutr ek2vi382" data-testid="stColumn"><div direction="column" height="100%" class="stVerticalBlock st-emotion-cache-wfksaw ek2vi383" data-testid="stVerticalBlock"><div class="stElementContainer element-container st-emotion-cache-3pwa5w ek2vi381" data-testid="stElementContainer" data-stale="false" width="100%" height="auto" overflow="visible"><div class="stMarkdown" data-testid="stMarkdown"><div class="st-emotion-cache-6c7yup eoo3rg91"><div data-testid="stMarkdownContainer" class="st-emotion-cache-19d5tm7 eqpbrs00"><div style="margin-top: 30px;"><b>Old:</b> 06-20-26 &nbsp; | &nbsp; <b>New:</b> 06-23-26</div></div></div></div></div></div></div></div></div></div></div></div></div><div class="stElementContainer element-container st-emotion-cache-1vo6xi6 ek2vi381" data-testid="stElementContainer" data-stale="false" width="100%" height="auto" overflow="visible"><div class="stException" data-testid="stException"><div role="alert" data-baseweb="notification" data-testid="stAlertContainer" class="stAlertContainer st-bp st-cf st-cg st-bs st-bt st-bu st-e0 st-e1 st-dk st-cb st-e2 st-e3 st-e4 st-aw st-ax st-e5 st-cj st-cl st-cm st-ck st-di st-eb st-e7 st-bg st-e8 st-ag st-co st-av st-au st-e9"><div class="st-ci st-ea"><div data-testid="stAlertContentError" class="st-emotion-cache-16wfys6 en1c6do0"><div class="st-emotion-cache-19s3t1h e1wpre4k7"><div data-testid="stExceptionMessage" class="st-emotion-cache-kwpt08 e1wpre4k4"><span class="st-emotion-cache-35ezg3 e1wpre4k1">KeyError</span>: 'Line_Req_Date'</div><div><div class="st-emotion-cache-cet0rr e1wpre4k2">Traceback:</div><pre class="st-emotion-cache-22c3nf e1t0zwa40"><div class="st-emotion-cache-giwl1o e1wpre4k3"><code class="st-emotion-cache-1tk510q e1gryr921"><div data-testid="stExceptionTraceRow" class="st-emotion-cache-1mrdis4 e1wpre4k0">File "/tmp/appRoot/streamlit_app.py", line 392, in &lt;module&gt;
+    fpt = firm_filtered.pivot_table(
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^</div><div data-testid="stExceptionTraceRow" class="st-emotion-cache-1mrdis4 e1wpre4k0">File "/usr/lib/python_udf/e67454ec2c45382b2818f29103f43d5e96c8a7607b26c80308334977b06411ea/lib/python3.11/site-packages/pandas/core/frame.py", line 9536, in pivot_table
+    return pivot_table(
+           ^^^^^^^^^^^^</div><div data-testid="stExceptionTraceRow" class="st-emotion-cache-1mrdis4 e1wpre4k0">File "/usr/lib/python_udf/e67454ec2c45382b2818f29103f43d5e96c8a7607b26c80308334977b06411ea/lib/python3.11/site-packages/pandas/core/reshape/pivot.py", line 102, in pivot_table
+    table = __internal_pivot_table(
+            ^^^^^^^^^^^^^^^^^^^^^^^</div><div data-testid="stExceptionTraceRow" class="st-emotion-cache-1mrdis4 e1wpre4k0">File "/usr/lib/python_udf/e67454ec2c45382b2818f29103f43d5e96c8a7607b26c80308334977b06411ea/lib/python3.11/site-packages/pandas/core/reshape/pivot.py", line 172, in __internal_pivot_table
+    grouped = data.groupby(keys, observed=observed_bool, sort=sort, dropna=dropna)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^</div><div data-testid="stExceptionTraceRow" class="st-emotion-cache-1mrdis4 e1wpre4k0">File "/usr/lib/python_udf/e67454ec2c45382b2818f29103f43d5e96c8a7607b26c80308334977b06411ea/lib/python3.11/site-packages/pandas/core/frame.py", line 9210, in groupby
+    return DataFrameGroupBy(
+           ^^^^^^^^^^^^^^^^^</div><div data-testid="stExceptionTraceRow" class="st-emotion-cache-1mrdis4 e1wpre4k0">File "/usr/lib/python_udf/e67454ec2c45382b2818f29103f43d5e96c8a7607b26c80308334977b06411ea/lib/python3.11/site-packages/pandas/core/groupby/groupby.py", line 1331, in __init__
+    grouper, exclusions, obj = get_grouper(
+                               ^^^^^^^^^^^^</div><div data-testid="stExceptionTraceRow" class="st-emotion-cache-1mrdis4 e1wpre4k0">File "/usr/lib/python_udf/e67454ec2c45382b2818f29103f43d5e96c8a7607b26c80308334977b06411ea/lib/python3.11/site-packages/pandas/core/groupby/grouper.py", line 1043, in get_grouper
+    raise KeyError(gpr)</div></code></div></pre></div></div></div></div></div></div></div></div></div><div data-testid="stAppIframeResizerAnchor" data-iframe-height="true" class="st-emotion-cache-1dumvfu e4man119"></div></section></div></div></div></div><div data-testid="portal" id="portal" class="st-emotion-cache-1q6lfs0 e1hos2sk1"></div></div><div class=""></div></div>
+  
+
+<div style="opacity: 0; pointer-events: none; position: fixed; color: rgb(232, 245, 233);"></div></body><canvas style="display: none; opacity: 0; position: fixed;"></canvas></html>

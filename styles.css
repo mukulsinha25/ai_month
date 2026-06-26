@@ -155,11 +155,46 @@ a {
     background: #fff;
 }
 
+.hero-stacked {
+    position: relative;
+}
+
+.hero-stacked .hero-video {
+    position: relative;
+    z-index: 2;
+}
+
+.hero-stacked .hero-image {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 1;
+}
+
+.hero-video {
+    width: 100%;
+    max-width: 100%;
+    height: auto;
+    display: block;
+    transition: opacity 1.5s ease;
+    opacity: 1;
+}
+
+.hero-video.fade-out {
+    opacity: 0;
+}
+
 .hero-image {
     width: 100%;
     max-width: 100%;
     height: auto;
     display: block;
+    transition: opacity 1.5s ease;
+    opacity: 0;
+}
+
+.hero-image.fade-in {
+    opacity: 1;
 }
 
 /* Sections Common */
