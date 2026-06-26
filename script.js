@@ -16,8 +16,18 @@ const landingImage = document.getElementById('landing-image');
 
 if (landingVideo && landingImage) {
     landingVideo.addEventListener('ended', () => {
-        landingVideo.classList.add('fade-out');
-        landingImage.classList.add('fade-in');
+        // Fade out video
+        landingVideo.style.opacity = '0';
+        
+        // After fade out, hide video and show image with fade in
+        setTimeout(() => {
+            landingVideo.style.display = 'none';
+            landingImage.style.display = 'block';
+            // Trigger reflow then fade in
+            requestAnimationFrame(() => {
+                landingImage.style.opacity = '1';
+            });
+        }, 1500);
     });
 }
 
